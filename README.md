@@ -70,7 +70,7 @@ git clone <repository-url>
 cd poc-customers-nest-kafka
 ```
 
-### 2. Levantar la infraestructura
+### 2. Levantar la infraestructura con docker
 
 ```bash
 docker-compose up -d
@@ -85,13 +85,24 @@ Esto levantará:
 - **Service Profiling** (puerto 3002)
 - **Service Notifications** (puerto 3003)
 
-o levantar solo Kafka y los servicios con pnpm
+### Levantar Kafka con Docker y Servicios manualmente
 
 ```bash
+# Levanta Kafka
 docker-compose -f docker-compose.kafka.yml up -d
+
+# Levanta service-customer
+cd apps/service-customer
+pnpm i
+pnpm run start:dev
+
+# Levanta service-notifications
+cd apps/service-notifications
+pnpm i
+pnpm run start:dev
 ```
 
-### 3. Verificar que todo esté funcionando
+## 3. Verificar que todo esté funcionando
 
 ```bash
 # Verificar contenedores
@@ -100,6 +111,8 @@ docker-compose ps
 # Verificar logs
 docker-compose logs -f
 ```
+
+
 
 ### Pruebas manuales
 

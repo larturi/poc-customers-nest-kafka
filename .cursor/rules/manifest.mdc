@@ -1,0 +1,103 @@
+# Customer Management PoC
+
+## Descripción del Proyecto
+
+Este es un Proof of Concept (PoC) para la gestión integral del ciclo de vida del Cliente Ecosistémico de una Fintech, implementado como un monorepo con NestJS y Kafka.
+
+## Arquitectura
+
+### Servicios Microservicios
+
+1. **service-customer** (Puerto 3001)
+   - Gestión del ciclo de vida del cliente
+   - Endpoints:
+     - `/api/v1/customers/onboard`,
+     - `/api/v1/customers/activate`,
+     - `/api/v1/customers/deactivate`
+   - Eventos emitidos:
+     - `customer.registered`,
+     - `customer.activated`,
+     - `customer.deactivated`
+
+2. **service-profiling** (Puerto 3002)
+   - Perfilado y promociones
+   - Endpoint:
+     - `/api/v1/profiling/promote`
+   - Eventos emitidos:
+     - `customer.profiled`
+
+3. **service-notifications** (Puerto 3003)
+   - Notificaciones transaccionales
+   - Endpoints:
+     - `/api/v1/notifications/email`,
+     - `/api/v1/notifications/sms`
+
+### Infraestructura
+
+- **Kafka**: Broker de mensajería para eventos
+- **Zookeeper**: Coordinador de Kafka
+- **Kafka UI**: Interfaz web para monitoreo (opcional)
+
+## Estructura del Monorepo
+
+```bash
+poc-customers-nest-kafka/
+├── apps/
+│   ├── service-customer/          # Servicio de gestión de clientes
+│   ├── service-profiling/         # Servicio de perfilado y promociones
+│   └── service-notifications/     # Servicio de notificaciones
+├── docker-compose.yml             # Orquestación de servicios
+└── tsconfig.json                  # Configuración de TypeScript
+```
+
+## Eventos Kafka
+
+### Topics Principales
+
+- `customer.registered`: Cliente registrado exitosamente
+- `customer.activated`: Cliente activado
+- `customer.deactivated`: Cliente desactivado
+- `customer.profiled`: Cliente perfilado con promociones
+- `customer.firstPayment`: Primer pago realizado
+
+### Formato de Eventos
+
+```json
+{
+  "customerId": "customer_1234567890",
+  "email": "cliente@ejemplo.com",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "data": {}
+}
+```
+
+## API Endpoints
+
+### Service Customer
+
+- `POST /api/v1/customers/onboard` - Crear nuevo cliente
+- `POST /api/v1/customers/activate` - Activar cliente
+- `POST /api/v1/customers/deactivate` - Desactivar cliente
+
+### Service Profiling
+
+- `POST /api/v1/profiling/promote` - Perfilar cliente y generar promociones
+
+### Service Notifications
+
+- `POST /api/v1/notifications/email` - Enviar notificación por email
+- `POST /api/v1/notifications/sms` - Enviar notificación por SMS
+
+## Flujo de Trabajo
+
+1. **Onboarding**: Cliente se registra → Evento `customer.registered`
+2. **Activación**: Cliente se activa → Evento `customer.activated`
+3. **Perfilado**: Sistema perfila cliente → Evento `customer.profiled`
+4. **Primer Pago**: Cliente realiza primer pago → Evento `customer.firstPayment`
+5. **Notificaciones**: Sistema envía notificaciones según eventos
+
+## Tecnologías Utilizadas
+
+- **Backend**: NestJS, TypeScript
+- **Mensajería**: Apache Kafka, Kafkajs
+- **Contenedores**: Docker, Docker Compose

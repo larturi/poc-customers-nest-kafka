@@ -11,6 +11,14 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node"
-  }
-} 
+    "moduleResolution": "node",
+    "declaration": false,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@fintech/kafka": ["../../libs/kafka/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+}
