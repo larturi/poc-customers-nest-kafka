@@ -80,6 +80,7 @@ services:
       NODE_ENV: development
       PORT: 3001
       KAFKA_BROKERS: kafka:29092
+      KAFKAJS_NO_PARTITIONER_WARNING: 1
     volumes:
       - ./apps/service-customer:/app
       - /app/node_modules
@@ -100,6 +101,7 @@ services:
       NODE_ENV: development
       PORT: 3002
       KAFKA_BROKERS: kafka:29092
+      KAFKAJS_NO_PARTITIONER_WARNING: 1
     volumes:
       - ./apps/service-profiling:/app
       - /app/node_modules
@@ -120,6 +122,7 @@ services:
       NODE_ENV: development
       PORT: 3003
       KAFKA_BROKERS: kafka:29092
+      KAFKAJS_NO_PARTITIONER_WARNING: 1
     volumes:
       - ./apps/service-notifications:/app
       - /app/node_modules
