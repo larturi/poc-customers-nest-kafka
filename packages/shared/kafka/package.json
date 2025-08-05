@@ -1,0 +1,23 @@
+{
+  "name": "@shared/kafka",
+  "version": "1.0.0",
+  "description": "Módulo compartido de Kafka para servicios NestJS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0"
+  }
+} 

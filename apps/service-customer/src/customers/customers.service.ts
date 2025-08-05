@@ -1,265 +1,170 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { OnboardCustomerDto, ActivateCustomerDto, DeactivateCustomerDto } from './dto';
-import { KafkaService } from '../kafka/kafka.service';
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  documentType?: string;
-  documentNumber?: string;
-  birthDate?: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  status: 'pending' | 'active' | 'inactive';
-  tier: 'basic' | 'premium' | 'vip';
-  onboardingDate: string;
-  activationDate?: string;
-  deactivationDate?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Injectable, Logger } from '@nestjs/common'
+import { KafkaService } from '@shared/kafka'
+import { OnboardCustomerDto } from './dto/onboard-customer.dto'
+import { ActivateCustomerDto } from './dto/activate-customer.dto'
+import { DeactivateCustomerDto } from './dto/deactivate-customer.dto'
 
 @Injectable()
-export class CustomersService implements OnModuleInit {
-  private readonly logger = new Logger(CustomersService.name);
-  private customers: Map<string, Customer> = new Map();
+export class CustomersService {
+  private readonly logger = new Logger(CustomersService.name)
+  private customers = new Map<string, any>()
 
-  constructor(private readonly kafkaService: KafkaService) {}
-
-  async onModuleInit() {
-    // Suscribirse a eventos de otros servicios
-    await this.setupEventListeners();
+  constructor(private readonly kafkaService: KafkaService) {
+    this.initializeKafkaSubscriptions()
   }
 
-  private async setupEventListeners() {
+  private async initializeKafkaSubscriptions() {
     // Suscribirse a eventos de notificaciones
-    await this.kafkaService.subscribeToMultiple([
-      {
-        topic: 'notification.sent',
-        handler: async (message) => {
-          await this.handleNotificationSent(message);
-        },
-      },
-    ]);
-
-    this.logger.log('🎧 Event listeners configurados exitosamente');
+    await this.kafkaService.subscribe('notification.sent', async (message) => {
+      this.logger.log(`📧 Notificación enviada: ${JSON.stringify(message)}`)
+    })
   }
 
-  private async handleNotificationSent(message: any) {
-    this.logger.log(
-      `📧 Notificación enviada para cliente: ${message.customerId}`,
-    );
+  async onboardCustomer(dto: OnboardCustomerDto) {
+    this.logger.log(`🚀 Onboarding cliente: ${JSON.stringify(dto)}`)
 
-    // Aquí podrías actualizar el estado del cliente o registrar la notificación
-    const customer = this.customers.get(message.customerId);
-    if (customer) {
-      this.logger.log(
-        `✅ Notificación ${message.type} enviada exitosamente a ${message.recipient}`,
-      );
-    }
-  }
-
-  async onboardCustomer(onboardCustomerDto: OnboardCustomerDto): Promise<any> {
-    this.logger.log(`Onboarding cliente: ${onboardCustomerDto.email}`);
-
-    const customerId = `cust_${Date.now()}`;
-    const now = new Date().toISOString();
-
-    const customer: Customer = {
+    // Simular procesamiento
+    const customerId = Date.now().toString()
+    const customer = {
       id: customerId,
-      name: onboardCustomerDto.name,
-      email: onboardCustomerDto.email,
-      phone: onboardCustomerDto.phone,
-      documentType: onboardCustomerDto.documentType,
-      documentNumber: onboardCustomerDto.documentNumber,
-      birthDate: onboardCustomerDto.birthDate,
-      address: onboardCustomerDto.address,
-      city: onboardCustomerDto.city,
-      country: onboardCustomerDto.country,
-      status: 'pending',
-      tier: 'basic',
-      onboardingDate: now,
-      createdAt: now,
-      updatedAt: now,
-    };
+      ...dto,
+      status: 'onboarded',
+      createdAt: new Date().toISOString()
+    }
 
-    // Guardar cliente en memoria (en producción sería una base de datos)
-    this.customers.set(customerId, customer);
+    // Guardar en memoria (en producción sería una base de datos)
+    this.customers.set(customerId, customer)
 
     // Emitir evento de cliente onboarded
     await this.kafkaService.emit('customer.onboarded', {
-      customerId: customer.id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      status: customer.status,
-      tier: customer.tier,
-      onboardingDate: customer.onboardingDate,
-    });
-
-    this.logger.log(`Cliente onboarded exitosamente: ${customerId}`);
+      customerId,
+      customer,
+      timestamp: new Date().toISOString()
+    })
 
     return {
       success: true,
-      customerId: customer.id,
-      message: 'Cliente onboarded exitosamente',
-      data: customer,
-    };
+      customerId,
+      message: 'Cliente onboarded exitosamente'
+    }
   }
 
-  async activateCustomer(activateCustomerDto: ActivateCustomerDto): Promise<any> {
-    this.logger.log(`Activando cliente: ${activateCustomerDto.customerId}`);
+  async activateCustomer(dto: ActivateCustomerDto) {
+    this.logger.log(`✅ Activando cliente: ${JSON.stringify(dto)}`)
 
-    const customer = this.customers.get(activateCustomerDto.customerId);
-    if (!customer) {
-      throw new Error(`Cliente no encontrado: ${activateCustomerDto.customerId}`);
+    // Simular procesamiento
+    const customer = {
+      id: dto.customerId,
+      status: 'active',
+      activatedAt: new Date().toISOString()
     }
 
-    if (customer.status === 'active') {
-      throw new Error(`Cliente ya está activo: ${activateCustomerDto.customerId}`);
+    // Actualizar en memoria
+    const existingCustomer = this.customers.get(dto.customerId)
+    if (existingCustomer) {
+      this.customers.set(dto.customerId, { ...existingCustomer, ...customer })
     }
-
-    const now = new Date().toISOString();
-    customer.status = 'active';
-    customer.activationDate = now;
-    customer.updatedAt = now;
-
-    // Actualizar cliente
-    this.customers.set(activateCustomerDto.customerId, customer);
 
     // Emitir evento de cliente activado
     await this.kafkaService.emit('customer.activated', {
-      customerId: customer.id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      status: customer.status,
-      tier: customer.tier,
-      activationDate: customer.activationDate,
-      activationReason: activateCustomerDto.activationReason,
-    });
-
-    this.logger.log(`Cliente activado exitosamente: ${customer.id}`);
+      customerId: dto.customerId,
+      customer,
+      timestamp: new Date().toISOString()
+    })
 
     return {
       success: true,
-      customerId: customer.id,
-      message: 'Cliente activado exitosamente',
-      data: customer,
-    };
+      customerId: dto.customerId,
+      message: 'Cliente activado exitosamente'
+    }
   }
 
-  async deactivateCustomer(deactivateCustomerDto: DeactivateCustomerDto): Promise<any> {
-    this.logger.log(`Desactivando cliente: ${deactivateCustomerDto.customerId}`);
+  async deactivateCustomer(dto: DeactivateCustomerDto) {
+    this.logger.log(`❌ Desactivando cliente: ${JSON.stringify(dto)}`)
 
-    const customer = this.customers.get(deactivateCustomerDto.customerId);
-    if (!customer) {
-      throw new Error(`Cliente no encontrado: ${deactivateCustomerDto.customerId}`);
+    // Simular procesamiento
+    const customer = {
+      id: dto.customerId,
+      status: 'inactive',
+      deactivatedAt: new Date().toISOString()
     }
 
-    if (customer.status === 'inactive') {
-      throw new Error(`Cliente ya está inactivo: ${deactivateCustomerDto.customerId}`);
+    // Actualizar en memoria
+    const existingCustomer = this.customers.get(dto.customerId)
+    if (existingCustomer) {
+      this.customers.set(dto.customerId, { ...existingCustomer, ...customer })
     }
-
-    const now = new Date().toISOString();
-    customer.status = 'inactive';
-    customer.deactivationDate = now;
-    customer.updatedAt = now;
-
-    // Actualizar cliente
-    this.customers.set(deactivateCustomerDto.customerId, customer);
 
     // Emitir evento de cliente desactivado
     await this.kafkaService.emit('customer.deactivated', {
-      customerId: customer.id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      status: customer.status,
-      tier: customer.tier,
-      deactivationDate: customer.deactivationDate,
-      deactivationReason: deactivateCustomerDto.deactivationReason,
-    });
-
-    this.logger.log(`Cliente desactivado exitosamente: ${customer.id}`);
+      customerId: dto.customerId,
+      customer,
+      timestamp: new Date().toISOString()
+    })
 
     return {
       success: true,
-      customerId: customer.id,
-      message: 'Cliente desactivado exitosamente',
-      data: customer,
-    };
+      customerId: dto.customerId,
+      message: 'Cliente desactivado exitosamente'
+    }
   }
 
-  async getCustomer(customerId: string): Promise<any> {
-    this.logger.log(`Obteniendo cliente: ${customerId}`);
+  async promoteCustomer(customerId: string) {
+    this.logger.log(`⭐ Promoviendo cliente: ${customerId}`)
 
-    const customer = this.customers.get(customerId);
-    if (!customer) {
-      throw new Error(`Cliente no encontrado: ${customerId}`);
+    // Simular procesamiento
+    const customer = {
+      id: customerId,
+      status: 'premium',
+      promotedAt: new Date().toISOString()
     }
 
-    return {
-      success: true,
-      data: customer,
-    };
-  }
-
-  async getAllCustomers(): Promise<any> {
-    this.logger.log('Obteniendo todos los clientes');
-
-    const customers = Array.from(this.customers.values());
-
-    return {
-      success: true,
-      count: customers.length,
-      data: customers,
-    };
-  }
-
-  // Método para promocionar cliente (ejemplo de funcionalidad adicional)
-  async promoteCustomer(customerId: string, newTier: 'basic' | 'premium' | 'vip'): Promise<any> {
-    this.logger.log(`Promocionando cliente: ${customerId} a tier: ${newTier}`);
-
-    const customer = this.customers.get(customerId);
-    if (!customer) {
-      throw new Error(`Cliente no encontrado: ${customerId}`);
+    // Actualizar en memoria
+    const existingCustomer = this.customers.get(customerId)
+    if (existingCustomer) {
+      this.customers.set(customerId, { ...existingCustomer, ...customer })
     }
 
-    if (customer.tier === newTier) {
-      throw new Error(`Cliente ya tiene el tier: ${newTier}`);
-    }
-
-    const oldTier = customer.tier;
-    const now = new Date().toISOString();
-    customer.tier = newTier;
-    customer.updatedAt = now;
-
-    // Actualizar cliente
-    this.customers.set(customerId, customer);
-
-    // Emitir evento de cliente promocionado
+    // Emitir evento de cliente promovido
     await this.kafkaService.emit('customer.promoted', {
-      customerId: customer.id,
-      name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      status: customer.status,
-      oldTier,
-      newTier: customer.tier,
-      promotionDate: now,
-    });
-
-    this.logger.log(`Cliente promocionado exitosamente: ${customer.id} de ${oldTier} a ${newTier}`);
+      customerId,
+      customer,
+      timestamp: new Date().toISOString()
+    })
 
     return {
       success: true,
-      customerId: customer.id,
-      message: 'Cliente promocionado exitosamente',
-      data: customer,
-    };
+      customerId,
+      message: 'Cliente promovido exitosamente'
+    }
   }
-} 
+
+  async getCustomer(customerId: string) {
+    this.logger.log(`🔍 Obteniendo cliente: ${customerId}`)
+
+    const customer = this.customers.get(customerId)
+    if (!customer) {
+      return {
+        success: false,
+        message: 'Cliente no encontrado'
+      }
+    }
+
+    return {
+      success: true,
+      customer
+    }
+  }
+
+  async getAllCustomers() {
+    this.logger.log(`📋 Obteniendo todos los clientes`)
+
+    const customers = Array.from(this.customers.values())
+
+    return {
+      success: true,
+      customers,
+      total: customers.length
+    }
+  }
+}

@@ -10,14 +10,15 @@ Servicio de gestión de clientes para fintech que maneja el ciclo de vida comple
 - **Gestión de Tiers**: Sistema de niveles (basic, premium, vip)
 - **Eventos Kafka**: Comunicación asíncrona con otros servicios
 - **Validación de Datos**: Validación automática de entrada
-- **Health Checks**: Endpoints de monitoreo
 
 ## 📋 Endpoints
 
 ### Health Check
+
 - `GET /api/v1/customers/health` - Estado del servicio
 
 ### Gestión de Clientes
+
 - `POST /api/v1/customers/onboard` - Onboarding de nuevo cliente
 - `POST /api/v1/customers/activate` - Activación de cliente
 - `POST /api/v1/customers/deactivate` - Desactivación de cliente
@@ -27,36 +28,20 @@ Servicio de gestión de clientes para fintech que maneja el ciclo de vida comple
 ## 🔄 Eventos Kafka
 
 ### Eventos Emitidos
+
 - `customer.onboarded` - Cliente registrado exitosamente
 - `customer.activated` - Cliente activado
 - `customer.deactivated` - Cliente desactivado
 - `customer.promoted` - Cliente promocionado de tier
 
 ### Eventos Consumidos
+
 - `notification.sent` - Notificación enviada por el servicio de notificaciones
-
-## 🏗️ Estructura del Proyecto
-
-```
-src/
-├── app.module.ts              # Módulo principal
-├── main.ts                    # Punto de entrada
-├── customers/
-│   ├── customers.controller.ts # Controlador REST
-│   ├── customers.service.ts    # Lógica de negocio
-│   └── dto/                   # Data Transfer Objects
-│       ├── index.ts
-│       ├── onboard-customer.dto.ts
-│       ├── activate-customer.dto.ts
-│       └── deactivate-customer.dto.ts
-└── kafka/
-    ├── kafka.module.ts        # Módulo de Kafka
-    └── kafka.service.ts       # Servicio de Kafka
-```
 
 ## 🛠️ Instalación y Ejecución
 
 ### Desarrollo
+
 ```bash
 # Instalar dependencias
 pnpm install
@@ -66,6 +51,7 @@ pnpm run start:dev
 ```
 
 ### Producción
+
 ```bash
 # Construir la aplicación
 pnpm run build
@@ -75,6 +61,7 @@ pnpm run start:prod
 ```
 
 ### Docker
+
 ```bash
 # Construir imagen
 docker build -t service-customer .
@@ -91,6 +78,7 @@ docker run -p 3001:3001 service-customer
 ## 🔧 Configuración Kafka
 
 El servicio se conecta automáticamente a Kafka con la siguiente configuración:
+
 - **Client ID**: `service-customer`
 - **Group ID**: `customers-group`
 - **Brokers**: Configurados via variable de entorno `KAFKA_BROKERS`
@@ -98,6 +86,7 @@ El servicio se conecta automáticamente a Kafka con la siguiente configuración:
 ## 📝 Ejemplos de Uso
 
 ### Onboarding de Cliente
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/customers/onboard \
   -H "Content-Type: application/json" \
@@ -115,6 +104,7 @@ curl -X POST http://localhost:3001/api/v1/customers/onboard \
 ```
 
 ### Activación de Cliente
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/customers/activate \
   -H "Content-Type: application/json" \
@@ -125,6 +115,7 @@ curl -X POST http://localhost:3001/api/v1/customers/activate \
 ```
 
 ### Desactivación de Cliente
+
 ```bash
 curl -X POST http://localhost:3001/api/v1/customers/deactivate \
   -H "Content-Type: application/json" \
@@ -134,28 +125,10 @@ curl -X POST http://localhost:3001/api/v1/customers/deactivate \
   }'
 ```
 
-## 🧪 Testing
-
-```bash
-# Ejecutar tests unitarios
-pnpm run test
-
-# Ejecutar tests en modo watch
-pnpm run test:watch
-
-# Ejecutar tests con coverage
-pnpm run test:cov
-```
-
-## 📈 Monitoreo
-
-- **Health Check**: `GET /api/v1/customers/health`
-- **Logs**: El servicio emite logs detallados con emojis para facilitar el debugging
-- **Métricas**: Los eventos Kafka incluyen timestamps y metadata completa
-
 ## 🔗 Integración con Otros Servicios
 
 Este servicio está diseñado para trabajar en conjunto con:
+
 - **Service Notifications**: Recibe eventos de notificaciones enviadas
 - **Kafka**: Sistema de mensajería para comunicación asíncrona
-- **Otros servicios**: Puede emitir eventos para otros servicios del ecosistema 
+- **Otros servicios**: Puede emitir eventos para otros servicios del ecosistema

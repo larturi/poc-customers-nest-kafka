@@ -1,165 +1,152 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { SendEmailDto, SendSmsDto } from './dto';
-import { KafkaService } from '../kafka/kafka.service';
+import { Injectable, Logger } from '@nestjs/common';
+import { KafkaService } from '@shared/kafka';
+import { SendEmailDto } from './dto/send-email.dto';
+import { SendSmsDto } from './dto/send-sms.dto';
 
 @Injectable()
-export class NotificationsService implements OnModuleInit {
+export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
 
-  constructor(private readonly kafkaService: KafkaService) {}
-
-  async onModuleInit() {
-    // Suscribirse a eventos de otros servicios
-    await this.setupEventListeners();
+  constructor(private readonly kafkaService: KafkaService) {
+    this.initializeKafkaSubscriptions();
   }
 
-  private async setupEventListeners() {
-    // Suscribirse a todos los topics de una sola vez
+  private async initializeKafkaSubscriptions() {
+    // Suscribirse a eventos de clientes
     await this.kafkaService.subscribeToMultiple([
       {
         topic: 'customer.onboarded',
         handler: async (message) => {
+          this.logger.log(`🚀 Cliente onboarded recibido: ${JSON.stringify(message)}`);
           await this.handleCustomerOnboarded(message);
-        },
+        }
       },
       {
         topic: 'customer.activated',
         handler: async (message) => {
+          this.logger.log(`✅ Cliente activado recibido: ${JSON.stringify(message)}`);
           await this.handleCustomerActivated(message);
-        },
+        }
       },
       {
         topic: 'customer.promoted',
         handler: async (message) => {
+          this.logger.log(`⭐ Cliente promovido recibido: ${JSON.stringify(message)}`);
           await this.handleCustomerPromoted(message);
-        },
-      },
+        }
+      }
     ]);
-
-    this.logger.log('🎧 Event listeners configurados exitosamente');
   }
 
   private async handleCustomerOnboarded(message: any) {
-    this.logger.log(
-      `📧 Procesando evento de onboarding para cliente: ${message.customerId}`,
-    );
-
-    // Enviar email de bienvenida
-    await this.sendEmail({
-      customerId: message.customerId,
-      email: message.email,
+    this.logger.log(`📧 Enviando email de bienvenida a: ${message.customer?.email || 'cliente'}`);
+    
+    // Simular envío de email de bienvenida
+    const emailData = {
+      to: message.customer?.email || 'cliente@example.com',
+      subject: '¡Bienvenido a nuestra plataforma!',
       template: 'welcome',
       data: {
-        customerName: message.name,
-        onboardingDate: message.onboardingDate,
-      },
+        customerName: message.customer?.name || 'Cliente',
+        customerId: message.customerId
+      }
+    };
+
+    await this.sendEmail(emailData);
+    
+    // Emitir evento de notificación enviada
+    await this.kafkaService.emit('notification.sent', {
+      customerId: message.customerId,
+      type: 'email',
+      template: 'welcome',
+      recipient: emailData.to,
+      timestamp: new Date().toISOString()
     });
   }
 
   private async handleCustomerActivated(message: any) {
-    this.logger.log(
-      `📧 Procesando evento de activación para cliente: ${message.customerId}`,
-    );
-
-    // Enviar email de confirmación de activación
-    await this.sendEmail({
-      customerId: message.customerId,
-      email: message.email,
+    this.logger.log(`📧 Enviando email de activación a: ${message.customer?.email || 'cliente'}`);
+    
+    // Simular envío de email de activación
+    const emailData = {
+      to: message.customer?.email || 'cliente@example.com',
+      subject: 'Tu cuenta ha sido activada',
       template: 'account-activated',
       data: {
-        customerName: message.name,
-        activationDate: message.activationDate,
-      },
+        customerName: message.customer?.name || 'Cliente',
+        customerId: message.customerId,
+        activationDate: message.customer?.activatedAt
+      }
+    };
+
+    await this.sendEmail(emailData);
+    
+    // Emitir evento de notificación enviada
+    await this.kafkaService.emit('notification.sent', {
+      customerId: message.customerId,
+      type: 'email',
+      template: 'account-activated',
+      recipient: emailData.to,
+      timestamp: new Date().toISOString()
     });
   }
 
   private async handleCustomerPromoted(message: any) {
-    this.logger.log(
-      `📧 Procesando evento de promoción para cliente: ${message.customerId}`,
-    );
-
-    // Enviar email de felicitaciones por la promoción
-    await this.sendEmail({
-      customerId: message.customerId,
-      email: message.email,
-      template: 'promotion-congratulations',
+    this.logger.log(`📧 Enviando email de promoción a: ${message.customer?.email || 'cliente'}`);
+    
+    // Simular envío de email de promoción
+    const emailData = {
+      to: message.customer?.email || 'cliente@example.com',
+      subject: '¡Felicidades! Has sido promovido',
+      template: 'promotion',
       data: {
-        customerName: message.name,
-        newTier: message.newTier,
-        promotionDate: message.promotionDate,
-      },
+        customerName: message.customer?.name || 'Cliente',
+        customerId: message.customerId,
+        newStatus: message.customer?.status || 'premium'
+      }
+    };
+
+    await this.sendEmail(emailData);
+    
+    // Emitir evento de notificación enviada
+    await this.kafkaService.emit('notification.sent', {
+      customerId: message.customerId,
+      type: 'email',
+      template: 'promotion',
+      recipient: emailData.to,
+      timestamp: new Date().toISOString()
     });
   }
 
-  async sendEmail(sendEmailDto: SendEmailDto) {
-    this.logger.log(`Enviando email a: ${sendEmailDto.email}`);
+  async sendEmail(dto: SendEmailDto) {
+    this.logger.log(`📧 Enviando email: ${JSON.stringify(dto)}`);
 
     // Simular envío de email
-    const notification = {
-      id: `notif_${Date.now()}`,
-      customerId: sendEmailDto.customerId,
-      type: 'email',
-      template: sendEmailDto.template,
-      recipient: sendEmailDto.email,
-      status: 'sent',
-      sentAt: new Date().toISOString(),
-      data: sendEmailDto.data,
-    };
+    await new Promise(resolve => setTimeout(resolve, 100)); // Simular delay
 
-    // Emitir evento de notificación enviada
-    await this.kafkaService.emit('notification.sent', {
-      notificationId: notification.id,
-      customerId: notification.customerId,
-      type: notification.type,
-      template: notification.template,
-      recipient: notification.recipient,
-      status: notification.status,
-      sentAt: notification.sentAt,
-    });
-
-    this.logger.log(`Email enviado exitosamente: ${notification.id}`);
+    this.logger.log(`✅ Email enviado exitosamente a: ${dto.to}`);
 
     return {
       success: true,
-      notificationId: notification.id,
-      message: 'Email enviado exitosamente',
-      data: notification,
+      messageId: `email_${Date.now()}`,
+      recipient: dto.to,
+      message: 'Email enviado exitosamente'
     };
   }
 
-  async sendSms(sendSmsDto: SendSmsDto) {
-    this.logger.log(`Enviando SMS a: ${sendSmsDto.phone}`);
+  async sendSms(dto: SendSmsDto) {
+    this.logger.log(`📱 Enviando SMS: ${JSON.stringify(dto)}`);
 
     // Simular envío de SMS
-    const notification = {
-      id: `notif_${Date.now()}`,
-      customerId: sendSmsDto.customerId,
-      type: 'sms',
-      template: sendSmsDto.template,
-      recipient: sendSmsDto.phone,
-      status: 'sent',
-      sentAt: new Date().toISOString(),
-      data: sendSmsDto.data,
-    };
+    await new Promise(resolve => setTimeout(resolve, 50)); // Simular delay
 
-    // Emitir evento de notificación enviada
-    await this.kafkaService.emit('notification.sent', {
-      notificationId: notification.id,
-      customerId: notification.customerId,
-      type: notification.type,
-      template: notification.template,
-      recipient: notification.recipient,
-      status: notification.status,
-      sentAt: notification.sentAt,
-    });
-
-    this.logger.log(`SMS enviado exitosamente: ${notification.id}`);
+    this.logger.log(`✅ SMS enviado exitosamente a: ${dto.to}`);
 
     return {
       success: true,
-      notificationId: notification.id,
-      message: 'SMS enviado exitosamente',
-      data: notification,
+      messageId: `sms_${Date.now()}`,
+      recipient: dto.to,
+      message: 'SMS enviado exitosamente'
     };
   }
 }
