@@ -1,39 +1,33 @@
-import { IsString, IsEmail, IsNotEmpty, IsOptional, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsDateString
+} from 'class-validator'
 
 export class OnboardCustomerDto {
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  name!: string
 
   @IsEmail()
   @IsNotEmpty()
-  email!: string;
+  email!: string
 
   @IsString()
   @IsNotEmpty()
-  phone!: string;
+  phone!: string
 
   @IsString()
   @IsOptional()
-  documentType?: string;
+  documentType?: string
 
   @IsString()
   @IsOptional()
-  documentNumber?: string;
+  documentNumber?: string
 
   @IsDateString()
   @IsOptional()
-  birthDate?: string;
-
-  @IsString()
-  @IsOptional()
-  address?: string;
-
-  @IsString()
-  @IsOptional()
-  city?: string;
-
-  @IsString()
-  @IsOptional()
-  country?: string;
-} 
+  birthDate?: string
+}
