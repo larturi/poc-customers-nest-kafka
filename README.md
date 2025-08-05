@@ -100,6 +100,11 @@ pnpm run start:dev
 cd apps/service-notifications
 pnpm i
 pnpm run start:dev
+
+# Levanta service-profiling
+cd apps/service-profiling
+pnpm i
+pnpm run start:dev
 ```
 
 ## 3. Verificar que todo esté funcionando

@@ -101,3 +101,10 @@ poc-customers-nest-kafka/
 - **Backend**: NestJS, TypeScript
 - **Mensajería**: Apache Kafka, Kafkajs
 - **Contenedores**: Docker, Docker Compose
+
+## Proximos pasos
+
+- Crear directorio libs con libreria comun de kafka que esta triplicada
+- Configuracion Full Docker
+- Postman Collection
+- Mermaid diagram
