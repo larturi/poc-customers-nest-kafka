@@ -16,7 +16,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@poc/kafka": ["../../libs/kafka/src/index.ts"]
+      "@fintech/kafka": ["../../libs/kafka/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

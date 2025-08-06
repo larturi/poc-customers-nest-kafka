@@ -1,13 +1,17 @@
-import { IsString, IsNotEmpty, IsObject } from 'class-validator';
+import { IsString, IsNotEmpty, IsObject, IsOptional } from 'class-validator';
 
 export class SendSmsDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  customerId!: string;
+  customerId?: string;
 
   @IsString()
   @IsNotEmpty()
-  phone!: string;
+  to!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  message!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -15,4 +19,4 @@ export class SendSmsDto {
 
   @IsObject()
   data!: Record<string, any>;
-} 
+}

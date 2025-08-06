@@ -1,13 +1,23 @@
-import { IsString, IsEmail, IsObject, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsObject,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 
 export class SendEmailDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  customerId!: string;
+  customerId?: string;
 
   @IsEmail()
   @IsNotEmpty()
-  email!: string;
+  to!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  subject!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -15,4 +25,4 @@ export class SendEmailDto {
 
   @IsObject()
   data!: Record<string, any>;
-} 
+}
