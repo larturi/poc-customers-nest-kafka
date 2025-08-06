@@ -82,8 +82,10 @@ services:
       KAFKA_BROKERS: kafka:29092
       KAFKAJS_NO_PARTITIONER_WARNING: 1
     volumes:
-      - ./apps/service-customer:/app
+      - ./apps/service-customer:/app/apps/service-customer
+      - ./packages/shared:/app/packages/shared
       - /app/node_modules
+      - /app/apps/service-customer/node_modules
     restart: unless-stopped
 
   # Service Profiling
@@ -103,8 +105,10 @@ services:
       KAFKA_BROKERS: kafka:29092
       KAFKAJS_NO_PARTITIONER_WARNING: 1
     volumes:
-      - ./apps/service-profiling:/app
+      - ./apps/service-profiling:/app/apps/service-profiling
+      - ./packages/shared:/app/packages/shared
       - /app/node_modules
+      - /app/apps/service-profiling/node_modules
     restart: unless-stopped
 
   # Service Notifications
@@ -124,8 +128,10 @@ services:
       KAFKA_BROKERS: kafka:29092
       KAFKAJS_NO_PARTITIONER_WARNING: 1
     volumes:
-      - ./apps/service-notifications:/app
+      - ./apps/service-notifications:/app/apps/service-notifications
+      - ./packages/shared:/app/packages/shared
       - /app/node_modules
+      - /app/apps/service-notifications/node_modules
     restart: unless-stopped
 
 volumes:

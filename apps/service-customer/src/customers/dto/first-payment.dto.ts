@@ -3,11 +3,11 @@ import { IsString, IsNumber, IsNotEmpty, IsOptional } from 'class-validator'
 export class FirstPaymentDto {
   @IsString()
   @IsNotEmpty()
-  customerId: string
+  customerId!: string
 
   @IsNumber()
   @IsNotEmpty()
-  amount: number
+  amount!: number
 
   @IsString()
   @IsOptional()

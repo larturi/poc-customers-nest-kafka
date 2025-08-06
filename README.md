@@ -70,6 +70,22 @@ KafkaModule.forRoot({
 - Docker y Docker Compose
 - pnpm (recomendado) o npm
 
+## Opción full docker
+
+### Iniciar servicios
+
+`docker-compose up -d`
+
+### Ver logs
+
+`docker-compose logs -f`
+
+### Verificar estado
+
+`docker-compose ps`
+
+## Opción manual
+
 ### 1. Clonar el repositorio
 
 ```bash
