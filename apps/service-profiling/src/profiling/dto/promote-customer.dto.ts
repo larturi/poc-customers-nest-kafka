@@ -1,4 +1,11 @@
-import { IsString, IsNumber, IsBoolean, IsNotEmpty, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsBoolean,
+  IsNotEmpty,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class PromoteCustomerDto {
   @IsString()
@@ -21,4 +28,12 @@ export class PromoteCustomerDto {
 
   @IsBoolean()
   isFirstPayment!: boolean;
-} 
+
+  @IsString()
+  @IsNotEmpty()
+  newTier!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  reason!: string;
+}

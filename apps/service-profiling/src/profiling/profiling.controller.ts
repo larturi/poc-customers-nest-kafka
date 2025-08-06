@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ProfilingService } from './profiling.service';
 import { PromoteCustomerDto } from './dto';
 
@@ -20,6 +27,6 @@ export class ProfilingController {
   @Post('promote')
   @HttpCode(HttpStatus.OK)
   async promote(@Body() promoteDto: PromoteCustomerDto) {
-    return this.profilingService.promote(promoteDto);
+    return this.profilingService.promoteCustomer(promoteDto);
   }
-} 
+}

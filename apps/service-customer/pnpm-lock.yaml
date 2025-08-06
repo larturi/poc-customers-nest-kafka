@@ -26,9 +26,6 @@ importers:
       class-validator:
         specifier: ^0.14.1
         version: 0.14.2
-      kafkajs:
-        specifier: ^2.2.4
-        version: 2.2.4
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2

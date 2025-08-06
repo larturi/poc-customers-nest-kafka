@@ -1,20 +1,35 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
+  // Configurar validación global
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true
+    })
+  );
+
   // Configurar CORS
   app.enableCors();
-  
+
   // Configurar prefijo global
   app.setGlobalPrefix('api/v1');
-  
+
+  const logger = new Logger('Bootstrap');
+
   const port = process.env.PORT || 3003;
   await app.listen(port);
-  
-  console.log(`🚀 Service Notifications ejecutándose en puerto ${port}`);
-  console.log(`📊 Health check: http://localhost:${port}/api/v1/health`);
+
+  logger.log(`🚀 Service Notifications ejecutándose en puerto ${port}`);
+
+  logger.log(
+    `📊 Health check: http://localhost:${port}/api/v1/notifications/health`
+  );
 }
 
 bootstrap(); 
