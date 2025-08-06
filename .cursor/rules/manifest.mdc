@@ -38,18 +38,6 @@ Este es un Proof of Concept (PoC) para la gestión integral del ciclo de vida de
 - **Zookeeper**: Coordinador de Kafka
 - **Kafka UI**: Interfaz web para monitoreo (opcional)
 
-## Estructura del Monorepo
-
-```bash
-poc-customers-nest-kafka/
-├── apps/
-│   ├── service-customer/          # Servicio de gestión de clientes
-│   ├── service-profiling/         # Servicio de perfilado y promociones
-│   └── service-notifications/     # Servicio de notificaciones
-├── docker-compose.yml             # Orquestación de servicios
-└── tsconfig.json                  # Configuración de TypeScript
-```
-
 ## Eventos Kafka
 
 ### Topics Principales
@@ -60,24 +48,14 @@ poc-customers-nest-kafka/
 - `customer.profiled`: Cliente perfilado con promociones
 - `customer.firstPayment`: Primer pago realizado
 
-### Formato de Eventos
-
-```json
-{
-  "customerId": "customer_1234567890",
-  "email": "cliente@ejemplo.com",
-  "timestamp": "2024-01-01T00:00:00.000Z",
-  "data": {}
-}
-```
-
 ## API Endpoints
 
 ### Service Customer
 
 - `POST /api/v1/customers/onboard` - Crear nuevo cliente
 - `POST /api/v1/customers/activate` - Activar cliente
-- `POST /api/v1/customers/deactivate` - Desactivar cliente
+- `POST /api/v1/customers/deactivate` - Baja cliente
+- `POST /api/v1/customers/first-payment` - Primer pago
 
 ### Service Profiling
 

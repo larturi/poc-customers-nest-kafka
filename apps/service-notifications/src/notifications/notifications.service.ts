@@ -54,6 +54,15 @@ export class NotificationsService {
           await this.handleCustomerPromoted(message);
         },
       },
+      {
+        topic: 'customer.promotion.activated',
+        handler: async (message) => {
+          this.logger.log(
+            formatLogMessage('🎉 Promoción activada recibida:', message),
+          );
+          await this.handlePromotionActivated(message);
+        },
+      },
     ]);
   }
 
@@ -138,6 +147,37 @@ export class NotificationsService {
       customerId: message.customerId,
       type: 'email',
       template: 'promotion',
+      recipient: emailData.to,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  private async handlePromotionActivated(message: any) {
+    this.logger.log(
+      `📧 Enviando email de bonificación a: ${message.customer?.email || 'cliente'}`,
+    );
+
+    // Simular envío de email de bonificación
+    const emailData = {
+      to: message.customer?.email || 'cliente@example.com',
+      subject: '¡Bonificación del 60% activada!',
+      template: 'first-payment-bonus',
+      data: {
+        customerName: message.customer?.name || 'Cliente',
+        customerId: message.customerId,
+        discount: message.promotion.discount,
+        validUntil: message.promotion.validUntil,
+        paymentAmount: message.promotion.paymentAmount,
+      },
+    };
+
+    await this.sendEmail(emailData);
+
+    // Emitir evento de notificación enviada
+    await this.kafkaService.emit('notification.sent', {
+      customerId: message.customerId,
+      type: 'email',
+      template: 'first-payment-bonus',
       recipient: emailData.to,
       timestamp: new Date().toISOString(),
     });

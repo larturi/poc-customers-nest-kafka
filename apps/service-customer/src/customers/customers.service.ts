@@ -3,6 +3,7 @@ import { KafkaService } from '@shared/kafka'
 import { OnboardCustomerDto } from './dto/onboard-customer.dto'
 import { ActivateCustomerDto } from './dto/activate-customer.dto'
 import { DeactivateCustomerDto } from './dto/deactivate-customer.dto'
+import { FirstPaymentDto } from './dto/first-payment.dto'
 
 @Injectable()
 export class CustomersService {
@@ -106,6 +107,51 @@ export class CustomersService {
       success: true,
       customerId: dto.customerId,
       message: 'Cliente desactivado exitosamente'
+    }
+  }
+
+  async firstPayment(dto: FirstPaymentDto) {
+    this.logger.log(`💳 Primer pago del cliente: ${JSON.stringify(dto)}`)
+
+    // Verificar que el cliente existe
+    const existingCustomer = this.customers.get(dto.customerId)
+    if (!existingCustomer) {
+      return {
+        success: false,
+        message: 'Cliente no encontrado'
+      }
+    }
+
+    // Simular procesamiento del pago
+    const payment = {
+      customerId: dto.customerId,
+      amount: dto.amount,
+      paymentMethod: dto.paymentMethod || 'credit_card',
+      description: dto.description || 'Primer pago del cliente',
+      processedAt: new Date().toISOString()
+    }
+
+    // Actualizar cliente con información del primer pago
+    const updatedCustomer = {
+      ...existingCustomer,
+      firstPaymentAt: new Date().toISOString(),
+      hasFirstPayment: true
+    }
+    this.customers.set(dto.customerId, updatedCustomer)
+
+    // Emitir evento de primer pago
+    await this.kafkaService.emit('customer.firstPayment', {
+      customerId: dto.customerId,
+      payment,
+      customer: updatedCustomer,
+      timestamp: new Date().toISOString()
+    })
+
+    return {
+      success: true,
+      customerId: dto.customerId,
+      payment,
+      message: 'Primer pago procesado exitosamente'
     }
   }
 

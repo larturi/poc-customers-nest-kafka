@@ -16,61 +16,108 @@ export class ProfilingService {
       {
         topic: 'customer.onboarded',
         handler: async (message) => {
-          this.logger.log(`🚀 Cliente onboarded recibido: ${JSON.stringify(message)}`);
+          this.logger.log(
+            `🚀 Cliente onboarded recibido: ${JSON.stringify(message)}`,
+          );
           await this.processCustomerOnboarded(message);
-        }
+        },
       },
       {
         topic: 'customer.activated',
         handler: async (message) => {
-          this.logger.log(`✅ Cliente activado recibido: ${JSON.stringify(message)}`);
+          this.logger.log(
+            `✅ Cliente activado recibido: ${JSON.stringify(message)}`,
+          );
           await this.processCustomerActivated(message);
-        }
-      }
+        },
+      },
+      {
+        topic: 'customer.firstPayment',
+        handler: async (message) => {
+          this.logger.log(
+            `💳 Primer pago recibido: ${JSON.stringify(message)}`,
+          );
+          await this.processFirstPayment(message);
+        },
+      },
     ]);
   }
 
   private async processCustomerOnboarded(message: any) {
-    this.logger.log(`📊 Procesando perfil de cliente onboarded: ${message.customerId}`);
-    
+    this.logger.log(
+      `📊 Procesando perfil de cliente onboarded: ${message.customerId}`,
+    );
+
     // Simular análisis de perfil
     const profile = {
       customerId: message.customerId,
       riskScore: Math.floor(Math.random() * 100),
       segment: this.calculateSegment(message),
       recommendations: this.generateRecommendations(message),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     // Emitir evento de cliente perfilado
     await this.kafkaService.emit('customer.profiled', {
       customerId: message.customerId,
       profile,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     this.logger.log(`📈 Perfil generado para cliente: ${message.customerId}`);
   }
 
   private async processCustomerActivated(message: any) {
-    this.logger.log(`📊 Actualizando perfil de cliente activado: ${message.customerId}`);
-    
+    this.logger.log(
+      `📊 Actualizando perfil de cliente activado: ${message.customerId}`,
+    );
+
     // Simular actualización de perfil
     const updatedProfile = {
       customerId: message.customerId,
       riskScore: Math.floor(Math.random() * 100),
       segment: 'active',
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
 
     // Emitir evento de cliente perfilado actualizado
     await this.kafkaService.emit('customer.profiled', {
       customerId: message.customerId,
       profile: updatedProfile,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
-    this.logger.log(`📈 Perfil actualizado para cliente: ${message.customerId}`);
+    this.logger.log(
+      `📈 Perfil actualizado para cliente: ${message.customerId}`,
+    );
+  }
+
+  private async processFirstPayment(message: any) {
+    this.logger.log(
+      `💳 Procesando primer pago para cliente: ${message.customerId}`,
+    );
+
+    // Activar promoción del 60% de bonificación
+    const promotion = {
+      customerId: message.customerId,
+      type: 'first_payment_bonus',
+      discount: 60,
+      description: 'Bonificación del 60% por primer pago',
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 días
+      activatedAt: new Date().toISOString(),
+      paymentAmount: message.payment.amount,
+    };
+
+    // Emitir evento de promoción activada
+    await this.kafkaService.emit('customer.promotion.activated', {
+      customerId: message.customerId,
+      promotion,
+      timestamp: new Date().toISOString(),
+    });
+
+    this.logger.log(
+      `🎉 Promoción del 60% activada para cliente: ${message.customerId}`,
+    );
   }
 
   private calculateSegment(message: any): string {
@@ -85,34 +132,36 @@ export class ProfilingService {
       'Considerar productos de inversión',
       'Evaluar seguros de vida',
       'Revisar opciones de crédito',
-      'Explorar servicios premium'
+      'Explorar servicios premium',
     ];
-    
+
     return recommendations.slice(0, Math.floor(Math.random() * 3) + 1);
   }
 
   async promoteCustomer(dto: PromoteCustomerDto) {
-    this.logger.log(`⭐ Promoviendo cliente manualmente: ${JSON.stringify(dto)}`);
+    this.logger.log(
+      `⭐ Promoviendo cliente manualmente: ${JSON.stringify(dto)}`,
+    );
 
     // Simular proceso de promoción
     const promotion = {
       customerId: dto.customerId,
       newTier: dto.newTier,
       reason: dto.reason,
-      promotedAt: new Date().toISOString()
+      promotedAt: new Date().toISOString(),
     };
 
     // Emitir evento de cliente promovido
     await this.kafkaService.emit('customer.profiled', {
       customerId: dto.customerId,
       promotion,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     return {
       success: true,
       customerId: dto.customerId,
-      message: `Cliente promovido a ${dto.newTier} exitosamente`
+      message: `Cliente promovido a ${dto.newTier} exitosamente`,
     };
   }
-} 
+}

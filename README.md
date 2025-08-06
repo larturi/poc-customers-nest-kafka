@@ -11,22 +11,16 @@ Este proyecto implementa una arquitectura de microservicios con comunicación as
 ### 1. **Service-Customer** (`apps/service-customer/`)
 
 - **Responsabilidad**: Gestión del ciclo de vida de clientes
-- **Eventos emitidos**: `customer.onboarded`, `customer.activated`, `customer.deactivated`, `customer.promoted`
-- **Eventos consumidos**: `notification.sent`
 - **Puerto**: 3001
 
 ### 2. **Service-Profiling** (`apps/service-profiling/`)
 
 - **Responsabilidad**: Análisis y perfilado de clientes
-- **Eventos emitidos**: `customer.profiled`
-- **Eventos consumidos**: `customer.onboarded`, `customer.activated`
 - **Puerto**: 3002
 
 ### 3. **Service-Notifications** (`apps/service-notifications/`)
 
 - **Responsabilidad**: Envío de notificaciones (email, SMS)
-- **Eventos emitidos**: `notification.sent`
-- **Eventos consumidos**: `customer.onboarded`, `customer.activated`, `customer.promoted`
 - **Puerto**: 3003
 
 ## 🔧 Módulo Compartido de Kafka
@@ -120,39 +114,4 @@ npm run start:dev
 # Terminal 3 - Service Notifications
 cd apps/service-notifications
 npm run start:dev
-```
-
-## 🔄 Flujo de Eventos
-
-### 1. **Onboarding de Cliente**
-
-```bash
-Service-Customer → customer.onboarded → Service-Profiling, Service-Notifications
-```
-
-### 2. **Activación de Cliente**
-
-```bash
-Service-Customer → customer.activated → Service-Profiling, Service-Notifications
-```
-
-### 3. **Promoción de Cliente**
-
-```bash
-Service-Customer → customer.promoted → Service-Notifications
-Service-Profiling → customer.profiled → (otros servicios)
-```
-
-### 4. **Notificaciones**
-
-```bash
-Service-Notifications → notification.sent → Service-Customer
-```
-
-### Kafka UI
-
-Acceder a la interfaz web de Kafka:
-
-```bash
-http://localhost:8080
 ```

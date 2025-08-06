@@ -1,3 +1,4 @@
-export * from './onboard-customer.dto';
-export * from './activate-customer.dto';
-export * from './deactivate-customer.dto'; 
+export * from './onboard-customer.dto'
+export * from './activate-customer.dto'
+export * from './deactivate-customer.dto'
+export * from './first-payment.dto'
