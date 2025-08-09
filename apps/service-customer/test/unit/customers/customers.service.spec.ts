@@ -167,21 +167,8 @@ describe('CustomersService', () => {
 
   describe('getAllCustomers', () => {
     it('should return all customers', async () => {
-      // Crear un nuevo módulo para este test específico
-      const testModule: TestingModule = await Test.createTestingModule({
-        providers: [
-          CustomersService,
-          {
-            provide: KafkaService,
-            useValue: mockKafkaService
-          }
-        ]
-      }).compile()
-
-      const testService = testModule.get<CustomersService>(CustomersService)
-
-      // Crear los clientes uno por uno con un pequeño delay para evitar IDs duplicados
-      const customer1 = await testService.onboardCustomer({
+      // Crear los clientes usando la misma instancia del servicio
+      const customer1 = await service.onboardCustomer({
         name: 'Cliente 1',
         email: 'cliente1@example.com',
         phone: '+1111111111'
@@ -190,13 +177,13 @@ describe('CustomersService', () => {
       // Pequeño delay para asegurar IDs únicos
       await new Promise((resolve) => setTimeout(resolve, 1))
 
-      const customer2 = await testService.onboardCustomer({
+      const customer2 = await service.onboardCustomer({
         name: 'Cliente 2',
         email: 'cliente2@example.com',
         phone: '+2222222222'
       } as OnboardCustomerDto)
 
-      const result = await testService.getAllCustomers()
+      const result = await service.getAllCustomers()
 
       expect(result.success).toBe(true)
       expect(result.customers).toHaveLength(2)
@@ -209,20 +196,7 @@ describe('CustomersService', () => {
     })
 
     it('should return empty array when no customers exist', async () => {
-      // Crear un nuevo módulo para este test específico
-      const testModule: TestingModule = await Test.createTestingModule({
-        providers: [
-          CustomersService,
-          {
-            provide: KafkaService,
-            useValue: mockKafkaService
-          }
-        ]
-      }).compile()
-
-      const testService = testModule.get<CustomersService>(CustomersService)
-
-      const result = await testService.getAllCustomers()
+      const result = await service.getAllCustomers()
 
       expect(result.success).toBe(true)
       expect(result.customers).toHaveLength(0)

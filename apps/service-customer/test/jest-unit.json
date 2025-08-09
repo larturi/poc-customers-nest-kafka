@@ -1,13 +1,13 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "rootDir": "..",
   "testEnvironment": "node",
   "testRegex": ".spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": [
       "ts-jest",
       {
-        "tsconfig": "<rootDir>/../tsconfig.test.json"
+        "tsconfig": "<rootDir>/tsconfig.test.json"
       }
     ]
   },
@@ -15,10 +15,10 @@
   "coverageDirectory": "../coverage",
   "coverageReporters": ["text", "lcov", "html"],
   "testPathIgnorePatterns": ["/node_modules/", "/dist/"],
-  "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
+  "setupFilesAfterEnv": ["<rootDir>/test/jest.setup.ts"],
   "moduleNameMapper": {
-    "^@shared/kafka$": "<rootDir>/__mocks__/@shared/kafka.ts"
+    "^@shared/kafka$": "<rootDir>/test/__mocks__/@shared/kafka.ts"
   },
-  "modulePaths": ["<rootDir>/../../", "<rootDir>/../src"],
+  "modulePaths": ["<rootDir>/src", "<rootDir>/../../packages"],
   "moduleDirectories": ["node_modules", "src"]
 }
