@@ -17,8 +17,9 @@
     "baseUrl": "./",
     "paths": {
       "@fintech/kafka": ["../../libs/kafka/src/index.ts"]
-    }
+    },
+    "types": ["jest", "node"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

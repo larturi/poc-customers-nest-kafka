@@ -48,6 +48,9 @@ pnpm install
 
 # Ejecutar en modo desarrollo
 pnpm run start:dev
+
+# Tests unitarios
+pnpm run test:unit
 ```
 
 ### Producción

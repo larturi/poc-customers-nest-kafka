@@ -41,6 +41,9 @@ Servicio de notificaciones para la PoC de gestión del ciclo de vida del Cliente
 
 ```bash
 pnpm start:dev
+
+# Tests unitarios
+pnpm run test:unit
 ```
 
 ### Producción
