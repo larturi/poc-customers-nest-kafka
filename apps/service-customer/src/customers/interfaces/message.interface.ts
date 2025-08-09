@@ -1,11 +1,21 @@
-// Interfaz para los mensajes de eventos de clientes
 export interface Customer {
   id: string;
   name: string;
   email: string;
   status?: string;
   activatedAt?: string;
+  deactivatedAt?: string;
+  firstPaymentAt?: string;
   promotedAt?: string;
+  createdAt?: string;
+}
+
+export interface Payment {
+  customerId: string;
+  amount: number;
+  paymentMethod?: string;
+  description?: string;
+  processedAt: string;
 }
 
 export interface CustomerOnboardedMessage {
@@ -20,27 +30,22 @@ export interface CustomerActivatedMessage {
   timestamp: string;
 }
 
-export interface CustomerPromotedMessage {
+export interface CustomerDeactivatedMessage {
   customerId: string;
   customer: Customer;
   timestamp: string;
 }
 
-export interface Promotion {
+export interface FirstPaymentMessage {
   customerId: string;
-  type: string;
-  discount: number;
-  description: string;
-  validUntil: string;
-  activatedAt: string;
-  paymentAmount?: number;
-  newTier?: string;
-  reason?: string;
+  payment: Payment;
+  customer: Customer;
+  timestamp: string;
 }
 
-export interface PromotionActivatedMessage {
+export interface CustomerPromotedMessage {
   customerId: string;
-  promotion: Promotion;
+  customer: Customer;
   timestamp: string;
 }
 
@@ -52,10 +57,10 @@ export interface NotificationSentMessage {
   timestamp: string;
 }
 
-// Tipo genérico para mensajes Kafka
-export type KafkaMessage =
+export type CustomersKafkaMessage =
   | CustomerOnboardedMessage
   | CustomerActivatedMessage
+  | CustomerDeactivatedMessage
+  | FirstPaymentMessage
   | CustomerPromotedMessage
-  | PromotionActivatedMessage
   | NotificationSentMessage;

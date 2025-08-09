@@ -42,16 +42,19 @@ export class MiServicio {
   constructor(private readonly kafkaService: KafkaService) {}
 
   async emitirEvento() {
-    await this.kafkaService.emit('evento.creado', {
+    await this.kafkaService.emit<{ id: number; mensaje: string }>('evento.creado', {
       id: 123,
       mensaje: 'Evento creado exitosamente'
     });
   }
 
   async suscribirseAEventos() {
-    await this.kafkaService.subscribe('evento.procesado', async (mensaje) => {
-      console.log('Evento procesado recibido:', mensaje);
-    });
+    await this.kafkaService.subscribe<{ id: number; estado: string }>(
+      'evento.procesado',
+      async (mensaje) => {
+        console.log('Evento procesado recibido:', mensaje);
+      }
+    );
   }
 }
 ```

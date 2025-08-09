@@ -4,6 +4,14 @@ import { OnboardCustomerDto } from './dto/onboard-customer.dto'
 import { ActivateCustomerDto } from './dto/activate-customer.dto'
 import { DeactivateCustomerDto } from './dto/deactivate-customer.dto'
 import { FirstPaymentDto } from './dto/first-payment.dto'
+import {
+  CustomerOnboardedMessage,
+  CustomerActivatedMessage,
+  CustomerDeactivatedMessage,
+  FirstPaymentMessage,
+  CustomerPromotedMessage,
+  NotificationSentMessage
+} from './interfaces/message.interface'
 
 @Injectable()
 export class CustomersService {
@@ -16,9 +24,12 @@ export class CustomersService {
 
   private async initializeKafkaSubscriptions() {
     // Suscribirse a eventos de notificaciones
-    await this.kafkaService.subscribe('notification.sent', async (message) => {
-      this.logger.log(`📧 Notificación enviada: ${JSON.stringify(message)}`)
-    })
+    await this.kafkaService.subscribe<NotificationSentMessage>(
+      'notification.sent',
+      async (message) => {
+        this.logger.log(`📧 Notificación enviada: ${JSON.stringify(message)}`)
+      }
+    )
   }
 
   async onboardCustomer(dto: OnboardCustomerDto) {
@@ -37,7 +48,7 @@ export class CustomersService {
     this.customers.set(customerId, customer)
 
     // Emitir evento de cliente onboarded
-    await this.kafkaService.emit('customer.onboarded', {
+    await this.kafkaService.emit<CustomerOnboardedMessage>('customer.onboarded', {
       customerId,
       customer,
       timestamp: new Date().toISOString()
@@ -67,7 +78,7 @@ export class CustomersService {
     }
 
     // Emitir evento de cliente activado
-    await this.kafkaService.emit('customer.activated', {
+    await this.kafkaService.emit<CustomerActivatedMessage>('customer.activated', {
       customerId: dto.customerId,
       customer,
       timestamp: new Date().toISOString()
@@ -97,7 +108,7 @@ export class CustomersService {
     }
 
     // Emitir evento de cliente desactivado
-    await this.kafkaService.emit('customer.deactivated', {
+    await this.kafkaService.emit<CustomerDeactivatedMessage>('customer.deactivated', {
       customerId: dto.customerId,
       customer,
       timestamp: new Date().toISOString()
@@ -140,7 +151,7 @@ export class CustomersService {
     this.customers.set(dto.customerId, updatedCustomer)
 
     // Emitir evento de primer pago
-    await this.kafkaService.emit('customer.firstPayment', {
+    await this.kafkaService.emit<FirstPaymentMessage>('customer.firstPayment', {
       customerId: dto.customerId,
       payment,
       customer: updatedCustomer,
@@ -172,7 +183,7 @@ export class CustomersService {
     }
 
     // Emitir evento de cliente promovido
-    await this.kafkaService.emit('customer.promoted', {
+    await this.kafkaService.emit<CustomerPromotedMessage>('customer.promoted', {
       customerId,
       customer,
       timestamp: new Date().toISOString()

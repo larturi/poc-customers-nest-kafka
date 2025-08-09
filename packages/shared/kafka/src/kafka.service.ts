@@ -115,7 +115,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
    * @param message - Mensaje a emitir
    * @param key - Clave opcional para el mensaje (por defecto usa customerId o timestamp)
    */
-  async emit(topic: string, message: any, key?: string) {
+  async emit<T>(topic: string, message: T, key?: string): Promise<T> {
     try {
       // Validar que el topic esté en la lista de topics permitidos para emitir
       if (
@@ -141,6 +141,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(
         `📤 Evento emitido en topic '${topic}': ${JSON.stringify(message)}`
       )
+      return message
     } catch (error) {
       this.logger.error(`❌ Error emitiendo evento en topic '${topic}':`, error)
       throw error
@@ -151,8 +152,8 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
    * Suscribe a múltiples topics con sus respectivos handlers
    * @param topics - Array de objetos con topic y handler
    */
-  async subscribeToMultiple(
-    topics: Array<{ topic: string; handler: (message: any) => Promise<void> }>
+  async subscribeToMultiple<T = unknown>(
+    topics: Array<{ topic: string; handler: (message: T) => Promise<void> }>
   ) {
     try {
       this.logger.log(`🔄 Iniciando suscripción a ${topics.length} topics...`)
@@ -240,7 +241,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
    * @param topic - Nombre del topic
    * @param handler - Función que maneja los mensajes del topic
    */
-  async subscribe(topic: string, handler: (message: any) => Promise<void>) {
+  async subscribe<T>(topic: string, handler: (message: T) => Promise<void>) {
     try {
       // Validar que el topic esté en la lista de topics permitidos para consumir
       if (

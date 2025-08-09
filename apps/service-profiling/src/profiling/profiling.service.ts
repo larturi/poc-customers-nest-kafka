@@ -1,6 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { KafkaService } from '@shared/kafka';
 import { PromoteCustomerDto } from './dto/promote-customer.dto';
+import {
+  CustomerOnboardedMessage,
+  CustomerActivatedMessage,
+  FirstPaymentMessage,
+  CustomerProfiledMessage,
+  PromotionActivatedMessage,
+} from './interfaces/message.interface';
 
 @Injectable()
 export class ProfilingService {
@@ -15,7 +22,7 @@ export class ProfilingService {
     await this.kafkaService.subscribeToMultiple([
       {
         topic: 'customer.onboarded',
-        handler: async (message) => {
+        handler: async (message: CustomerOnboardedMessage) => {
           this.logger.log(
             `🚀 Cliente onboarded recibido: ${JSON.stringify(message)}`,
           );
@@ -24,7 +31,7 @@ export class ProfilingService {
       },
       {
         topic: 'customer.activated',
-        handler: async (message) => {
+        handler: async (message: CustomerActivatedMessage) => {
           this.logger.log(
             `✅ Cliente activado recibido: ${JSON.stringify(message)}`,
           );
@@ -33,7 +40,7 @@ export class ProfilingService {
       },
       {
         topic: 'customer.firstPayment',
-        handler: async (message) => {
+        handler: async (message: FirstPaymentMessage) => {
           this.logger.log(
             `💳 Primer pago recibido: ${JSON.stringify(message)}`,
           );
@@ -43,7 +50,7 @@ export class ProfilingService {
     ]);
   }
 
-  private async processCustomerOnboarded(message: any) {
+  private async processCustomerOnboarded(message: CustomerOnboardedMessage) {
     this.logger.log(
       `📊 Procesando perfil de cliente onboarded: ${message.customerId}`,
     );
@@ -58,7 +65,7 @@ export class ProfilingService {
     };
 
     // Emitir evento de cliente perfilado
-    await this.kafkaService.emit('customer.profiled', {
+    await this.kafkaService.emit<CustomerProfiledMessage>('customer.profiled', {
       customerId: message.customerId,
       profile,
       timestamp: new Date().toISOString(),
@@ -67,7 +74,7 @@ export class ProfilingService {
     this.logger.log(`📈 Perfil generado para cliente: ${message.customerId}`);
   }
 
-  private async processCustomerActivated(message: any) {
+  private async processCustomerActivated(message: CustomerActivatedMessage) {
     this.logger.log(
       `📊 Actualizando perfil de cliente activado: ${message.customerId}`,
     );
@@ -81,7 +88,7 @@ export class ProfilingService {
     };
 
     // Emitir evento de cliente perfilado actualizado
-    await this.kafkaService.emit('customer.profiled', {
+    await this.kafkaService.emit<CustomerProfiledMessage>('customer.profiled', {
       customerId: message.customerId,
       profile: updatedProfile,
       timestamp: new Date().toISOString(),
@@ -92,7 +99,7 @@ export class ProfilingService {
     );
   }
 
-  private async processFirstPayment(message: any) {
+  private async processFirstPayment(message: FirstPaymentMessage) {
     this.logger.log(
       `💳 Procesando primer pago para cliente: ${message.customerId}`,
     );
@@ -109,7 +116,7 @@ export class ProfilingService {
     };
 
     // Emitir evento de promoción activada
-    await this.kafkaService.emit('customer.promotion.activated', {
+    await this.kafkaService.emit<PromotionActivatedMessage>('customer.promotion.activated', {
       customerId: message.customerId,
       promotion,
       timestamp: new Date().toISOString(),
@@ -120,13 +127,13 @@ export class ProfilingService {
     );
   }
 
-  private calculateSegment(message: any): string {
+  private calculateSegment(message: CustomerOnboardedMessage | CustomerActivatedMessage): string {
     // Lógica simple para calcular segmento basado en datos del cliente
     const segments = ['basic', 'premium', 'vip'];
     return segments[Math.floor(Math.random() * segments.length)];
   }
 
-  private generateRecommendations(message: any): string[] {
+  private generateRecommendations(message: CustomerOnboardedMessage): string[] {
     // Simular generación de recomendaciones
     const recommendations = [
       'Considerar productos de inversión',
@@ -152,7 +159,7 @@ export class ProfilingService {
     };
 
     // Emitir evento de cliente promovido
-    await this.kafkaService.emit('customer.profiled', {
+    await this.kafkaService.emit<CustomerProfiledMessage>('customer.profiled', {
       customerId: dto.customerId,
       promotion,
       timestamp: new Date().toISOString(),
