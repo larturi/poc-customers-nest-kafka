@@ -1,0 +1,390 @@
+{
+	"info": {
+		"_postman_id": "9f057468-d437-4fde-b9e9-d568b5ccfed0",
+		"name": "PoC Nest Kafka",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7547402"
+	},
+	"item": [
+		{
+			"name": "customer",
+			"item": [
+				{
+					"name": "/health",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/customers/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/{customerId}",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/api/v1/customers/1754436319950",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								"1754436319950"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/onboard",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Juan Pérez\",\n    \"email\": \"juan.perez@ejemplo.com\",\n    \"phone\": \"+1234567890\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/customers/onboard",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								"onboard"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/activate",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"1754436319950\",\n    \"activationReason\": \"Verificación de identidad completada\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/customers/activate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								"activate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/deactivate",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"1754436319950\",\n    \"deactivationReason\": \"Posible fraude\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3001/api/v1/customers/deactivate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"api",
+								"v1",
+								"customers",
+								"deactivate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/first-payment",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"1754436319950\",\n    \"amount\": 100.00,\n    \"paymentMethod\": \"credit_card\",\n    \"description\": \"Primer pago mensual\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/customers/first-payment",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"customers",
+								"first-payment"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "profiling",
+			"item": [
+				{
+					"name": "/health",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3002/api/v1/profiling/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"api",
+								"v1",
+								"profiling",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/promote",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"1754436319950\",\n    \"age\": 35,\n    \"income\": 75000,\n    \"creditScore\": 720,\n    \"isFirstPayment\": false,\n    \"newTier\": \"PREMIUM\",\n    \"reason\": \"Cumple con los criterios de ingresos y score crediticio\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3002/api/v1/profiling/promote",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"api",
+								"v1",
+								"profiling",
+								"promote"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "notifications",
+			"item": [
+				{
+					"name": "/health",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3003/api/v1/notifications/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3003",
+							"path": [
+								"api",
+								"v1",
+								"notifications",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/email",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"1754436319950\",\n    \"to\": \"usuario@ejemplo.com\",\n    \"subject\": \"Asunto del email\",\n    \"template\": \"welcome-template\",\n    \"data\": {\n      \"name\": \"Juan Pérez\",\n      \"company\": \"Mi Empresa\",\n      \"activationLink\": \"https://example.com/activate\"\n    }\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3003/api/v1/notifications/email",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3003",
+							"path": [
+								"api",
+								"v1",
+								"notifications",
+								"email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/sms",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customerId\": \"1754436319950\",\n    \"to\": \"+541234567890\",\n    \"message\": \"Hola! Este es tu código de verificación: {{code}}\",\n    \"template\": \"verification-sms\",\n    \"data\": {\n      \"code\": \"123456\",\n      \"customerName\": \"Juan Pérez\",\n      \"expirationTime\": \"5 minutos\"\n    }\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3003/api/v1/notifications/sms",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3003",
+							"path": [
+								"api",
+								"v1",
+								"notifications",
+								"sms"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
