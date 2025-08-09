@@ -5,6 +5,7 @@ import { OnboardCustomerDto } from '../../../src/customers/dto/onboard-customer.
 import { ActivateCustomerDto } from '../../../src/customers/dto/activate-customer.dto'
 import { DeactivateCustomerDto } from '../../../src/customers/dto/deactivate-customer.dto'
 import { FirstPaymentDto } from '../../../src/customers/dto/first-payment.dto'
+import { PromoteCustomerDto } from '../../../src/customers/dto'
 
 describe('CustomersController', () => {
   let controller: CustomersController
@@ -16,7 +17,8 @@ describe('CustomersController', () => {
     deactivateCustomer: jest.fn(),
     firstPayment: jest.fn(),
     getCustomer: jest.fn(),
-    getAllCustomers: jest.fn()
+    getAllCustomers: jest.fn(),
+    promoteCustomer: jest.fn()
   }
 
   beforeEach(async () => {
@@ -152,6 +154,29 @@ describe('CustomersController', () => {
       const result = await controller.firstPayment(paymentDto)
 
       expect(service.firstPayment).toHaveBeenCalledWith(paymentDto)
+      expect(result).toEqual(expectedResult)
+    })
+  })
+
+  describe('promoteCustomer', () => {
+    it('should promote a customer successfully', async () => {
+      const promoteDto: PromoteCustomerDto = {
+        customerId: '1234567890'
+      }
+
+      const expectedResult = {
+        success: true,
+        customerId: '1234567890',
+        message: 'Cliente promocionado exitosamente'
+      }
+
+      service.promoteCustomer.mockResolvedValue(expectedResult)
+
+      const result = await controller.promoteCustomer(promoteDto)
+
+      expect(service.promoteCustomer).toHaveBeenCalledWith(
+        promoteDto.customerId
+      )
       expect(result).toEqual(expectedResult)
     })
   })
