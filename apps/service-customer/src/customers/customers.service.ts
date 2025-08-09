@@ -5,6 +5,14 @@ import { ActivateCustomerDto } from './dto/activate-customer.dto'
 import { DeactivateCustomerDto } from './dto/deactivate-customer.dto'
 import { FirstPaymentDto } from './dto/first-payment.dto'
 import { Customer } from './interfaces/customer.interface'
+import {
+  CustomerActivatedMessage,
+  CustomerDeactivatedMessage,
+  CustomerOnboardedMessage,
+  CustomerPromotedMessage,
+  FirstPaymentMessage,
+  NotificationSentMessage
+} from './interfaces/message.interface'
 
 @Injectable()
 export class CustomersService {
@@ -17,9 +25,12 @@ export class CustomersService {
 
   private async initializeKafkaSubscriptions() {
     // Suscribirse a eventos de notificaciones
-    await this.kafkaService.subscribe('notification.sent', async (message) => {
-      this.logger.log(`📧 Notificación enviada: ${JSON.stringify(message)}`)
-    })
+    await this.kafkaService.subscribe<NotificationSentMessage>(
+      'notification.sent',
+      async (message) => {
+        this.logger.log(`📧 Notificación enviada: ${JSON.stringify(message)}`)
+      }
+    )
   }
 
   async onboardCustomer(dto: OnboardCustomerDto) {
@@ -38,11 +49,14 @@ export class CustomersService {
     this.customers.set(customerId, customer)
 
     // Emitir evento de cliente onboarded
-    await this.kafkaService.emit('customer.onboarded', {
-      customerId,
-      customer,
-      timestamp: new Date().toISOString()
-    })
+    await this.kafkaService.emit<CustomerOnboardedMessage>(
+      'customer.onboarded',
+      {
+        customerId,
+        customer,
+        timestamp: new Date().toISOString()
+      }
+    )
 
     return {
       success: true,
@@ -52,79 +66,87 @@ export class CustomersService {
   }
 
   async activateCustomer(dto: ActivateCustomerDto) {
-    this.logger.log(`✅ Activando cliente: ${JSON.stringify(dto)}`)
+    this.logger.log(`✅ Activando cliente: ${JSON.stringify(dto)}`);
+
+    const existingCustomer = this.customers.get(dto.customerId);
+    if (!existingCustomer) {
+      // Opcional: manejar el caso en que el cliente no existe
+      this.logger.error(`Cliente no encontrado para activar: ${dto.customerId}`);
+      throw new Error('Cliente no encontrado');
+    }
 
     // Simular procesamiento
-    const customerUpdates: Partial<Customer> = {
-      id: dto.customerId,
+    const customer: Customer = {
+      ...existingCustomer,
       status: 'active',
-      activatedAt: new Date().toISOString()
-    }
+      activatedAt: new Date().toISOString(),
+    };
 
     // Actualizar en memoria
-    const existingCustomer = this.customers.get(dto.customerId)
-    const customer = existingCustomer
-      ? { ...existingCustomer, ...customerUpdates }
-      : customerUpdates
-
-    if (existingCustomer) {
-      this.customers.set(dto.customerId, customer as Customer)
-    }
+    this.customers.set(dto.customerId, customer);
 
     // Emitir evento de cliente activado
-    await this.kafkaService.emit('customer.activated', {
+    await this.kafkaService.emit<CustomerActivatedMessage>('customer.activated', {
       customerId: dto.customerId,
       customer,
-      timestamp: new Date().toISOString()
-    })
+      timestamp: new Date().toISOString(),
+    });
 
     return {
       success: true,
       customerId: dto.customerId,
-      message: 'Cliente activado exitosamente'
-    }
+      message: 'Cliente activado exitosamente',
+    };
   }
 
   async deactivateCustomer(dto: DeactivateCustomerDto) {
-    this.logger.log(`❌ Desactivando cliente: ${JSON.stringify(dto)}`)
+    this.logger.log(`❌ Desactivando cliente: ${JSON.stringify(dto)}`);
+
+    const existingCustomer = this.customers.get(dto.customerId);
+    if (!existingCustomer) {
+      this.logger.error(
+        `Cliente no encontrado para desactivar: ${dto.customerId}`,
+      );
+      throw new Error('Cliente no encontrado');
+    }
 
     // Simular procesamiento
-    const customer = {
-      id: dto.customerId,
+    const customer: Customer = {
+      ...existingCustomer,
       status: 'inactive',
-      deactivatedAt: new Date().toISOString()
-    }
+      deactivatedAt: new Date().toISOString(),
+    };
 
     // Actualizar en memoria
-    const existingCustomer = this.customers.get(dto.customerId)
-    if (existingCustomer) {
-      this.customers.set(dto.customerId, { ...existingCustomer, ...customer })
-    }
+    this.customers.set(dto.customerId, customer);
 
     // Emitir evento de cliente desactivado
-    await this.kafkaService.emit('customer.deactivated', {
-      customerId: dto.customerId,
-      customer,
-      timestamp: new Date().toISOString()
-    })
+    await this.kafkaService.emit<CustomerDeactivatedMessage>(
+      'customer.deactivated',
+      {
+        customerId: dto.customerId,
+        customer,
+        timestamp: new Date().toISOString(),
+      },
+    );
 
     return {
       success: true,
       customerId: dto.customerId,
-      message: 'Cliente desactivado exitosamente'
-    }
+      message: 'Cliente desactivado exitosamente',
+    };
   }
 
   async firstPayment(dto: FirstPaymentDto) {
-    this.logger.log(`💳 Primer pago del cliente: ${JSON.stringify(dto)}`)
+    this.logger.log(`💳 Primer pago del cliente: ${JSON.stringify(dto)}`);
 
     // Verificar que el cliente existe
-    const existingCustomer = this.customers.get(dto.customerId)
+    const existingCustomer = this.customers.get(dto.customerId);
     if (!existingCustomer) {
       return {
         success: false,
-        message: 'Cliente no encontrado'
-      }
+        message: 'Cliente no encontrado',
+      };
     }
 
     // Simular procesamiento del pago
@@ -133,65 +155,63 @@ export class CustomersService {
       amount: dto.amount,
       paymentMethod: dto.paymentMethod || 'credit_card',
       description: dto.description || 'Primer pago del cliente',
-      processedAt: new Date().toISOString()
-    }
+      processedAt: new Date().toISOString(),
+    };
 
     // Actualizar cliente con información del primer pago
-    const updatedCustomer: Partial<Customer> = {
+    const updatedCustomer: Customer = {
       ...existingCustomer,
       firstPaymentAt: new Date().toISOString(),
-      hasFirstPayment: true
-    }
-    this.customers.set(dto.customerId, updatedCustomer)
+    };
+    this.customers.set(dto.customerId, updatedCustomer);
 
     // Emitir evento de primer pago
-    await this.kafkaService.emit('customer.firstPayment', {
+    await this.kafkaService.emit<FirstPaymentMessage>('customer.firstPayment', {
       customerId: dto.customerId,
       payment,
       customer: updatedCustomer,
-      timestamp: new Date().toISOString()
-    })
+      timestamp: new Date().toISOString(),
+    });
 
     return {
       success: true,
       customerId: dto.customerId,
       payment,
-      message: 'Primer pago procesado exitosamente'
-    }
+      message: 'Primer pago procesado exitosamente',
+    };
   }
 
   async promoteCustomer(customerId: string) {
-    this.logger.log(`⭐ Promoviendo cliente: ${customerId}`)
+    this.logger.log(`⭐ Promoviendo cliente: ${customerId}`);
+
+    const existingCustomer = this.customers.get(customerId);
+    if (!existingCustomer) {
+      this.logger.error(`Cliente no encontrado para promover: ${customerId}`);
+      throw new Error('Cliente no encontrado');
+    }
 
     // Simular procesamiento
-    const customerUpdates: Partial<Customer> = {
-      id: customerId,
+    const customer: Customer = {
+      ...existingCustomer,
       status: 'premium',
-      promotedAt: new Date().toISOString()
-    }
+      promotedAt: new Date().toISOString(),
+    };
 
     // Actualizar en memoria
-    const existingCustomer = this.customers.get(customerId)
-    const customer = existingCustomer
-      ? { ...existingCustomer, ...customerUpdates }
-      : customerUpdates
-
-    if (existingCustomer) {
-      this.customers.set(customerId, customer as Customer)
-    }
+    this.customers.set(customerId, customer);
 
     // Emitir evento de cliente promovido
-    await this.kafkaService.emit('customer.promoted', {
+    await this.kafkaService.emit<CustomerPromotedMessage>('customer.promoted', {
       customerId,
       customer,
-      timestamp: new Date().toISOString()
-    })
+      timestamp: new Date().toISOString(),
+    });
 
     return {
       success: true,
       customerId,
-      message: 'Cliente promovido exitosamente'
-    }
+      message: 'Cliente promovido exitosamente',
+    };
   }
 
   async getCustomer(customerId: string) {

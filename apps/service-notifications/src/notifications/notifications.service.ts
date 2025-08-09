@@ -6,6 +6,8 @@ import {
   CustomerOnboardedMessage,
   CustomerActivatedMessage,
   CustomerPromotedMessage,
+  PromotionActivatedMessage,
+  NotificationSentMessage,
 } from './interfaces/message.interface';
 
 // Helper function para formatear logs con objetos JSON
@@ -25,50 +27,42 @@ export class NotificationsService {
   }
 
   private async initializeKafkaSubscriptions() {
-    // Suscribirse a eventos de clientes
-    await this.kafkaService.subscribeToMultiple([
+    const topics = [
       {
         topic: 'customer.onboarded',
-        handler: async (message) => {
-          this.logger.log(
-            formatLogMessage('🚀 Cliente onboarded recibido:', message),
-          );
+        handler: async (message: CustomerOnboardedMessage) => {
+          this.logger.log(formatLogMessage(' Cliente onboarded recibido:', message));
           await this.handleCustomerOnboarded(message);
         },
       },
       {
         topic: 'customer.activated',
-        handler: async (message) => {
-          this.logger.log(
-            formatLogMessage('✅ Cliente activado recibido:', message),
-          );
+        handler: async (message: CustomerActivatedMessage) => {
+          this.logger.log(formatLogMessage('✅ Cliente activado recibido:', message));
           await this.handleCustomerActivated(message);
         },
       },
       {
         topic: 'customer.promoted',
-        handler: async (message) => {
-          this.logger.log(
-            formatLogMessage('⭐ Cliente promovido recibido:', message),
-          );
+        handler: async (message: CustomerPromotedMessage) => {
+          this.logger.log(formatLogMessage('⭐ Cliente promovido recibido:', message));
           await this.handleCustomerPromoted(message);
         },
       },
       {
         topic: 'customer.promotion.activated',
-        handler: async (message) => {
-          this.logger.log(
-            formatLogMessage('🎉 Promoción activada recibida:', message),
-          );
+        handler: async (message: PromotionActivatedMessage) => {
+          this.logger.log(formatLogMessage(' Promoción activada recibida:', message));
           await this.handlePromotionActivated(message);
         },
       },
-    ]);
+    ];
+    await this.kafkaService.subscribeToMultiple(topics);
   }
 
   private async handleCustomerOnboarded(message: CustomerOnboardedMessage) {
     this.logger.log(
-      `📧 Enviando email de bienvenida a: ${message.customer?.email || 'cliente'}`,
+      ` Enviando email de bienvenida a: ${message.customer?.email || 'cliente'}`,
     );
 
     // Simular envío de email de bienvenida
@@ -85,7 +79,7 @@ export class NotificationsService {
     await this.sendEmail(emailData);
 
     // Emitir evento de notificación enviada
-    await this.kafkaService.emit('notification.sent', {
+    await this.kafkaService.emit<NotificationSentMessage>('notification.sent', {
       customerId: message.customerId,
       type: 'email',
       template: 'welcome',
@@ -96,7 +90,7 @@ export class NotificationsService {
 
   private async handleCustomerActivated(message: CustomerActivatedMessage) {
     this.logger.log(
-      `📧 Enviando email de activación a: ${message.customer?.email || 'cliente'}`,
+      ` Enviando email de activación a: ${message.customer?.email || 'cliente'}`,
     );
 
     // Simular envío de email de activación
@@ -114,7 +108,7 @@ export class NotificationsService {
     await this.sendEmail(emailData);
 
     // Emitir evento de notificación enviada
-    await this.kafkaService.emit('notification.sent', {
+    await this.kafkaService.emit<NotificationSentMessage>('notification.sent', {
       customerId: message.customerId,
       type: 'email',
       template: 'account-activated',
@@ -125,7 +119,7 @@ export class NotificationsService {
 
   private async handleCustomerPromoted(message: CustomerPromotedMessage) {
     this.logger.log(
-      `📧 Enviando email de promoción a: ${message.customer?.email || 'cliente'}`,
+      ` Enviando email de promoción a: ${message.customer?.email || 'cliente'}`,
     );
 
     // Simular envío de email de promoción
@@ -143,7 +137,7 @@ export class NotificationsService {
     await this.sendEmail(emailData);
 
     // Emitir evento de notificación enviada
-    await this.kafkaService.emit('notification.sent', {
+    await this.kafkaService.emit<NotificationSentMessage>('notification.sent', {
       customerId: message.customerId,
       type: 'email',
       template: 'promotion',
@@ -152,9 +146,9 @@ export class NotificationsService {
     });
   }
 
-  private async handlePromotionActivated(message: any) {
+  private async handlePromotionActivated(message: PromotionActivatedMessage) {
     this.logger.log(
-      `📧 Enviando email de bonificación a: ${message.customer?.email || 'cliente'}`,
+      ` Enviando email de bonificación a: ${message.customer?.email || 'cliente'}`,
     );
 
     // Simular envío de email de bonificación
@@ -174,7 +168,7 @@ export class NotificationsService {
     await this.sendEmail(emailData);
 
     // Emitir evento de notificación enviada
-    await this.kafkaService.emit('notification.sent', {
+    await this.kafkaService.emit<NotificationSentMessage>('notification.sent', {
       customerId: message.customerId,
       type: 'email',
       template: 'first-payment-bonus',
@@ -184,7 +178,7 @@ export class NotificationsService {
   }
 
   async sendEmail(dto: SendEmailDto) {
-    this.logger.log(formatLogMessage('📧 Enviando email:', dto));
+    this.logger.log(formatLogMessage(' Enviando email:', dto));
 
     // Simular envío de email
     await new Promise((resolve) => setTimeout(resolve, 100)); // Simular delay
@@ -200,7 +194,7 @@ export class NotificationsService {
   }
 
   async sendSms(dto: SendSmsDto) {
-    this.logger.log(formatLogMessage('📱 Enviando SMS:', dto));
+    this.logger.log(formatLogMessage(' Enviando SMS:', dto));
 
     // Simular envío de SMS
     await new Promise((resolve) => setTimeout(resolve, 50)); // Simular delay

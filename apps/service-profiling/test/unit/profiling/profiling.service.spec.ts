@@ -9,9 +9,18 @@ describe('ProfilingService', () => {
   let kafkaService: jest.Mocked<KafkaService>;
 
   const mockKafkaService = {
-    subscribeToMultiple: jest.fn().mockResolvedValue(undefined),
-    subscribe: jest.fn(),
-    emit: jest.fn(),
+    subscribe: jest.fn() as <T>(
+      topic: string,
+      handler: (message: T) => Promise<void>,
+    ) => Promise<void>,
+    subscribeToMultiple: jest.fn() as <T>(
+      topics: Array<{ topic: string; handler: (message: T) => Promise<void> }>,
+    ) => Promise<void>,
+    emit: jest.fn() as <T>(
+      topic: string,
+      message: T,
+      key?: string,
+    ) => Promise<T>,
   };
 
   beforeEach(async () => {
@@ -71,7 +80,11 @@ describe('ProfilingService', () => {
           customerId: promoteDto.customerId,
           newTier: promoteDto.newTier,
           reason: promoteDto.reason,
-          promotedAt: expect.any(String),
+          type: 'tier_promotion',
+          discount: 0,
+          description: `Promotion to tier ${promoteDto.newTier}`,
+          validUntil: expect.any(String),
+          activatedAt: expect.any(String),
         }),
         timestamp: expect.any(String),
       });

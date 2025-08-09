@@ -15,9 +15,18 @@ describe('NotificationsService', () => {
   let kafkaService: jest.Mocked<KafkaService>;
 
   const mockKafkaService = {
-    subscribe: jest.fn(),
-    subscribeToMultiple: jest.fn(),
-    emit: jest.fn(),
+    subscribe: jest.fn() as <T>(
+      topic: string,
+      handler: (message: T) => Promise<void>,
+    ) => Promise<void>,
+    subscribeToMultiple: jest.fn() as <T>(
+      topics: Array<{ topic: string; handler: (message: T) => Promise<void> }>,
+    ) => Promise<void>,
+    emit: jest.fn() as <T>(
+      topic: string,
+      message: T,
+      key?: string,
+    ) => Promise<T>,
   };
 
   beforeEach(async () => {
@@ -48,24 +57,22 @@ describe('NotificationsService', () => {
 
   describe('constructor', () => {
     it('should initialize kafka subscriptions', () => {
-      expect(kafkaService.subscribeToMultiple).toHaveBeenCalledWith([
-        {
-          topic: 'customer.onboarded',
-          handler: expect.any(Function),
-        },
-        {
-          topic: 'customer.activated',
-          handler: expect.any(Function),
-        },
-        {
-          topic: 'customer.promoted',
-          handler: expect.any(Function),
-        },
-        {
-          topic: 'customer.promotion.activated',
-          handler: expect.any(Function),
-        },
-      ]);
+      expect(kafkaService.subscribe).toHaveBeenCalledWith(
+        'customer.onboarded',
+        expect.any(Function),
+      );
+      expect(kafkaService.subscribe).toHaveBeenCalledWith(
+        'customer.activated',
+        expect.any(Function),
+      );
+      expect(kafkaService.subscribe).toHaveBeenCalledWith(
+        'customer.promoted',
+        expect.any(Function),
+      );
+      expect(kafkaService.subscribe).toHaveBeenCalledWith(
+        'customer.promotion.activated',
+        expect.any(Function),
+      );
     });
   });
 

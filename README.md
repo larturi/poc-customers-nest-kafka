@@ -135,7 +135,7 @@ pnpm run start:dev
 ### 5. Tests
 
 ```bash
-cd apps/service-customer && pnpm run test
-cd apps/service-profiling && pnpm run test
-cd apps/service-notifications && pnpm run test
+cd apps/service-customer && pnpm run test && cd ../..
+cd apps/service-profiling && pnpm run test && cd ../..
+cd apps/service-notifications && pnpm run test && cd ../..
 ```

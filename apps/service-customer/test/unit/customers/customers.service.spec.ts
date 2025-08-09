@@ -12,8 +12,15 @@ describe('CustomersService', () => {
   let kafkaService: jest.Mocked<KafkaService>
 
   const mockKafkaService = {
-    subscribe: jest.fn(),
-    emit: jest.fn()
+    subscribe: jest.fn() as <T>(
+      topic: string,
+      handler: (message: T) => Promise<void>,
+    ) => Promise<void>,
+    emit: jest.fn() as <T>(
+      topic: string,
+      message: T,
+      key?: string,
+    ) => Promise<T>,
   }
 
   beforeEach(async () => {
