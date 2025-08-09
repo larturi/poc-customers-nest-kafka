@@ -12,7 +12,8 @@ import {
   OnboardCustomerDto,
   ActivateCustomerDto,
   DeactivateCustomerDto,
-  FirstPaymentDto
+  FirstPaymentDto,
+  PromoteCustomerDto
 } from './dto'
 
 @Controller('customers')
@@ -54,6 +55,14 @@ export class CustomersController {
   @HttpCode(HttpStatus.OK)
   async firstPayment(@Body() firstPaymentDto: FirstPaymentDto) {
     return await this.customersService.firstPayment(firstPaymentDto)
+  }
+
+  @Post('promote')
+  @HttpCode(HttpStatus.OK)
+  async promoteCustomer(@Body() promoteCustomerDto: PromoteCustomerDto) {
+    return await this.customersService.promoteCustomer(
+      promoteCustomerDto.customerId
+    )
   }
 
   @Get(':customerId')
