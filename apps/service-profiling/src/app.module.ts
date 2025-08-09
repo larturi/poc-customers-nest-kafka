@@ -10,11 +10,15 @@ import { ProfilingService } from './profiling/profiling.service';
       groupId: 'profiling-group',
       topics: {
         emit: ['customer.profiled'],
-        consume: ['customer.onboarded', 'customer.activated']
-      }
-    })
+        consume: [
+          'customer.onboarded',
+          'customer.activated',
+          'customer.firstPayment',
+        ],
+      },
+    }),
   ],
   controllers: [ProfilingController],
   providers: [ProfilingService],
 })
-export class AppModule {} 
+export class AppModule {}

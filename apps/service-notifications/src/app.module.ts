@@ -9,11 +9,16 @@ import { NotificationsService } from './notifications/notifications.service';
       clientId: 'service-notifications',
       groupId: 'notifications-group',
       topics: {
-        consume: ['customer.onboarded', 'customer.activated', 'customer.promoted']
-      }
-    })
+        consume: [
+          'customer.onboarded',
+          'customer.activated',
+          'customer.promoted',
+          'customer.promotion.activated',
+        ],
+      },
+    }),
   ],
   controllers: [NotificationsController],
   providers: [NotificationsService],
 })
-export class AppModule {} 
+export class AppModule {}

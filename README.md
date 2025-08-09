@@ -98,16 +98,16 @@ cd poc-customers-nest-kafka
 ```bash
 # Instalar dependencias del paquete compartido
 cd packages/shared/kafka
-npm install
-npm run build
+pnpm install
+pnpm run build
 
 # Volver al directorio raíz
 cd ../../
 
 # Instalar dependencias de todos los servicios
-cd apps/service-customer && npm install && cd ../..
-cd apps/service-profiling && npm install && cd ../..
-cd apps/service-notifications && npm install && cd ../..
+cd apps/service-customer && pnpm install && cd ../..
+cd apps/service-profiling && pnpm install && cd ../..
+cd apps/service-notifications && pnpm install && cd ../..
 ```
 
 ### 3. Iniciar Kafka con Docker
@@ -121,13 +121,21 @@ docker-compose -f docker-compose.kafka.yml up -d
 ```bash
 # Terminal 1 - Service Customer
 cd apps/service-customer
-npm run start:dev
+pnpm run start:dev
 
 # Terminal 2 - Service Profiling
 cd apps/service-profiling
-npm run start:dev
+pnpm run start:dev
 
 # Terminal 3 - Service Notifications
 cd apps/service-notifications
-npm run start:dev
+pnpm run start:dev
+```
+
+### 5. Tests
+
+```bash
+cd apps/service-customer && pnpm run test
+cd apps/service-profiling && pnpm run test
+cd apps/service-notifications && pnpm run test
 ```
