@@ -4,6 +4,7 @@ import { OnboardCustomerDto } from './dto/onboard-customer.dto'
 import { ActivateCustomerDto } from './dto/activate-customer.dto'
 import { DeactivateCustomerDto } from './dto/deactivate-customer.dto'
 import { FirstPaymentDto } from './dto/first-payment.dto'
+import { Customer } from './interfaces/customer.interface'
 
 @Injectable()
 export class CustomersService {
@@ -26,7 +27,7 @@ export class CustomersService {
 
     // Simular procesamiento
     const customerId = Date.now().toString()
-    const customer = {
+    const customer: Customer = {
       id: customerId,
       ...dto,
       status: 'onboarded',
@@ -54,7 +55,7 @@ export class CustomersService {
     this.logger.log(`✅ Activando cliente: ${JSON.stringify(dto)}`)
 
     // Simular procesamiento
-    const customer = {
+    const customerUpdates: Partial<Customer> = {
       id: dto.customerId,
       status: 'active',
       activatedAt: new Date().toISOString()
@@ -62,8 +63,12 @@ export class CustomersService {
 
     // Actualizar en memoria
     const existingCustomer = this.customers.get(dto.customerId)
+    const customer = existingCustomer
+      ? { ...existingCustomer, ...customerUpdates }
+      : customerUpdates
+
     if (existingCustomer) {
-      this.customers.set(dto.customerId, { ...existingCustomer, ...customer })
+      this.customers.set(dto.customerId, customer as Customer)
     }
 
     // Emitir evento de cliente activado
@@ -132,7 +137,7 @@ export class CustomersService {
     }
 
     // Actualizar cliente con información del primer pago
-    const updatedCustomer = {
+    const updatedCustomer: Partial<Customer> = {
       ...existingCustomer,
       firstPaymentAt: new Date().toISOString(),
       hasFirstPayment: true
@@ -159,7 +164,7 @@ export class CustomersService {
     this.logger.log(`⭐ Promoviendo cliente: ${customerId}`)
 
     // Simular procesamiento
-    const customer = {
+    const customerUpdates: Partial<Customer> = {
       id: customerId,
       status: 'premium',
       promotedAt: new Date().toISOString()
@@ -167,8 +172,12 @@ export class CustomersService {
 
     // Actualizar en memoria
     const existingCustomer = this.customers.get(customerId)
+    const customer = existingCustomer
+      ? { ...existingCustomer, ...customerUpdates }
+      : customerUpdates
+
     if (existingCustomer) {
-      this.customers.set(customerId, { ...existingCustomer, ...customer })
+      this.customers.set(customerId, customer as Customer)
     }
 
     // Emitir evento de cliente promovido
