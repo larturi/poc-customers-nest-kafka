@@ -6,6 +6,67 @@ POC (Proof of Concept) de una arquitectura de microservicios usando NestJS y Kaf
 
 Este proyecto implementa una arquitectura de microservicios con comunicación asíncrona usando Apache Kafka:
 
+```mermaid
+---
+config:
+  theme: mc
+---
+flowchart LR
+  subgraph Cliente["Cliente"]
+    A["POST /customers/onboard"]
+    B["POST /customers/activate"]
+    C["POST /customers/deactivate"]
+    D["POST /customers/first-payment"]
+    E["POST /customers/promote"]
+  end
+
+  subgraph s1["service-customer"]
+    SC1["/onboard"]
+    SC2["/activate"]
+    SC3["/deactivate"]
+    SC4["/first-payment"]
+    SC5["/promote"]
+  end
+
+  subgraph Kafka["Kafka Event Bus"]
+    T1(("customer.onboarded"))
+    T2(("customer.activated"))
+    T3(("customer.deactivated"))
+    T4(("customer.firstPayment"))
+    T5(("customer.promoted"))
+  end
+
+  subgraph s2["service-profiling"]
+    P1["Perfilado + Promo"]
+  end
+
+  subgraph s3["service-notifications"]
+    N1["Customer Onboarded Notification"]
+    N2["Promotion Activated Notification"]
+    N3["Customer Activated Notification"]
+    N4["Customer Promoted Notification"]
+    N5["Customer Deactivated Notification"]
+  end
+
+  A --> SC1
+  B --> SC2
+  C --> SC3
+  D --> SC4
+  E --> SC5
+  SC1 -- "emit" --> T1
+  SC2 -- "emit" --> T2
+  SC3 -- "emit" --> T3
+  SC4 -- "emit" --> T4
+  SC5 -- "emit" --> T5
+  T1 --> P1
+  P1 -- "emit" --> T4
+  T1 --> N1
+  T4 --> N2
+  T2 --> N3
+  T5 --> N4
+  T3 --> N5
+```
+
 ## 📦 Servicios
 
 ### 1. **Service-Customer** (`apps/service-customer/`)
@@ -110,7 +171,7 @@ cd apps/service-profiling && pnpm install && cd ../..
 cd apps/service-notifications && pnpm install && cd ../..
 ```
 
-### 3. Iniciar Kafka con Docker
+### 3. Levantar Kafka con Docker
 
 ```bash
 docker-compose -f docker-compose.kafka.yml up -d
@@ -120,16 +181,13 @@ docker-compose -f docker-compose.kafka.yml up -d
 
 ```bash
 # Terminal 1 - Service Customer
-cd apps/service-customer
-pnpm run start:dev
+cd apps/service-customer && pnpm run start:dev
 
 # Terminal 2 - Service Profiling
-cd apps/service-profiling
-pnpm run start:dev
+cd apps/service-profiling && pnpm run start:dev
 
 # Terminal 3 - Service Notifications
-cd apps/service-notifications
-pnpm run start:dev
+cd apps/service-notifications && pnpm run start:dev
 ```
 
 ### 5. Tests

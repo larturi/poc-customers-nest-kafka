@@ -53,6 +53,63 @@ pnpm build
 pnpm start:prod
 ```
 
+## Configuración del servicio de notificaciones
+
+El servicio de notificaciones se configura en app.module.ts para escuchar el topic customer.onboarded:
+
+```ts
+KafkaModule.forRoot({
+  clientId: 'service-notifications',
+  groupId: 'notifications-group',
+  topics: {
+    consume: [
+      'customer.onboarded',  // ← Aquí se registra para escuchar
+      'customer.activated', // ← Aquí se registra para escuchar
+      'customer.promoted', // ← Aquí se registra para escuchar
+      'customer.promotion.activated', // ← Aquí se registra para escuchar
+    ],
+  },
+})
+```
+
+En `apps/service-notifications/src/notifications/notifications.service.ts` estan los handlers para cada topic:
+
+```ts
+ private async initializeKafkaSubscriptions() {
+    const topics = [
+      {
+        topic: 'customer.onboarded',
+        handler: async (message: CustomerOnboardedMessage) => {
+          this.logger.log(formatLogMessage(' Cliente onboarded recibido:', message));
+          await this.handleCustomerOnboarded(message);
+        },
+      },
+      {
+        topic: 'customer.activated',
+        handler: async (message: CustomerActivatedMessage) => {
+          this.logger.log(formatLogMessage('✅ Cliente activado recibido:', message));
+          await this.handleCustomerActivated(message);
+        },
+      },
+      {
+        topic: 'customer.promoted',
+        handler: async (message: CustomerPromotedMessage) => {
+          this.logger.log(formatLogMessage('⭐ Cliente promovido recibido:', message));
+          await this.handleCustomerPromoted(message);
+        },
+      },
+      {
+        topic: 'customer.promotion.activated',
+        handler: async (message: PromotionActivatedMessage) => {
+          this.logger.log(formatLogMessage(' Promoción activada recibida:', message));
+          await this.handlePromotionActivated(message);
+        },
+      },
+    ];
+    await this.kafkaService.subscribeToMultiple(topics);
+  }
+```
+
 ## 📡 Endpoints
 
 ### Health Check
